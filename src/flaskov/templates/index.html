@@ -1,1 +1,5 @@
-<a href="{{ url_for('main.about') }}"> some link </a>
+{% extends "base.html" %}
+
+{% block body %}
+<a href="{{ url_for('main.about') }}"> index </a>
+{% endblock %}
