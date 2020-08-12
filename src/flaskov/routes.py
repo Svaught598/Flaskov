@@ -72,7 +72,7 @@ def register_post():
     form = RegisterForm(request.form)
     #import pdb; pdb.set_trace()
 
-    # if user is auth, redirect to register page
+    # if user is auth, redirect to index page
     if current_user.is_authenticated:
         flash("Please logout to register a new account")
         return redirect(url_for('main.index'))
