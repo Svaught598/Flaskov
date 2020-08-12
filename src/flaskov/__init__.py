@@ -10,7 +10,10 @@ login_manager = LoginManager()
 def create_app(test_config=None):
     # create, configure, and db
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_object(DefaultConfig())
+    if test_config:
+        app.config.from_object(test_config)
+    else:
+        app.config.from_object(DefaultConfig())
 
     # initialize plugins
     db.app = app
@@ -43,3 +46,5 @@ class TestConfig:
     PASSWORD = "password"
     EMAIL = "JohnDoe@gmail.com"
     TESTING = True
+    WTF_CSRF_ENABLED = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False

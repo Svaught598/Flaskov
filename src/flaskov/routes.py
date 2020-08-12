@@ -17,6 +17,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from jinja2 import TemplateNotFound
 
 from .models import User
+from .forms import LoginForm, RegisterForm
 from . import db
 
 
@@ -36,6 +37,7 @@ def index():
 def about():
     return render_template("about.html")
 
+
 ###############################################################
 # Auth Blueprint                                              #
 ###############################################################
@@ -43,76 +45,60 @@ def about():
 auth = Blueprint("auth", __name__, template_folder="templates")
 
 
-# GET routes
-@auth.route("/login")
-def login():
-    return render_template("login.html")
-
-
-@auth.route("/register/")
-def register():
-    return render_template("register.html")
-
-
-# POST routes
-@auth.route("/login/", methods=['POST'])
+@auth.route("/login/", methods=['GET', 'POST'])
 def login_post():
+    """ Route for user login"""
+    form = LoginForm(request.form)
 
-    # get data from request and find user corresponding to it
-    username = request.form['username']
-    password = request.form['password']
-    remember = True if request.form['remember'] else False
-    user = User.query.filter_by(username=username).first()
+    # validate on submit returns false if GET request
+    # also checks form field validators
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=str(form.username.data)).first()
 
-    # redirect if any information is not correct
-    if not user:
+        # Check that user exists, and pass is correct
+        if user and user.check_password(form.password.data):
+            flash("Success!")
+            login_user(user, remember=form.remember)
+            return redirect(url_for('main.index'))
+
+        # else warn and redirect 
         flash("Incorrect Username or Password")
-        return redirect(url_for('auth.login'))
-    elif not check_password_hash(user.password, password):
-        flash("Incorrect Username or Password")
-        return redirect(url_for('auth.login'))
-    # if user exists, and pass is correct, login
-    else:
-        flash("Success!")
-        login_user(user, remember=remember)
-        #user.is_authenticated = True
-        print(user.is_authenticated)
+    return render_template('login.html')
+
+
+@auth.route("/register", methods=['GET', 'POST'])
+def register_post():
+    """ Route for user registration"""
+    form = RegisterForm(request.form)
+    #import pdb; pdb.set_trace()
+
+    # if user is auth, redirect to register page
+    if current_user.is_authenticated:
+        flash("Please logout to register a new account")
         return redirect(url_for('main.index'))
 
 
-@auth.route("/register", methods=['POST'])
-def register_post():
+    # validate_on_submit returns false if GET request
+    # also checks form field validators
+    if form.validate_on_submit():
+        username_taken = User.query.filter_by(username=str(form.username.data)).first()
+        email_taken = User.query.filter_by(email=str(form.email.data)).first()
 
-    # if user is authenticated, redirect with message
-    if current_user.is_authenticated:
-        flash("Please logout to register a new account")
-        return redirect(url_for('main'))
-    
-    # get data from request see if any fields are not unique
-    username = request.form['username']
-    email = request.form['email']
-    db.session.rollback()
-    username_taken = User.query.filter_by(username=username).first() 
-    email_taken = User.query.filter_by(email=email).first() 
 
-    # if email or username are taken, redirect
-    if username_taken:
-        flash("Sorry, that username is already taken!")
-        return redirect(url_for('auth.register'))
-    if email_taken:
-        flash("Sorry, that email is already taken!")
-        return redirect(url_for('auth.register'))
-    
-    # If everything is correct, create new user
-    hash_pass = generate_password_hash(request.form['password'])
-    user = User(
-        username = username,
-        email = email,
-        password = hash_pass,
-    )
-    db.session.add(user)
-    db.session.commit()
-    return redirect(url_for('main.index'))
+        if not username_taken and not email_taken:
+            flash("Success!")
+            user = User(username=str(form.username), email=str(form.email))
+            user.set_password(str(form.password.data))
+            db.session.add(user)
+            db.session.commit()
+            login_user(user)
+            return redirect(url_for('main.index'))
+
+        if username_taken:
+            flash("Sorry, that username is already taken!")
+        if email_taken:
+            flash("Sorry, that email is already taken!")
+    return render_template('register.html')
 
 
 # Login required routes
