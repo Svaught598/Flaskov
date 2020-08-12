@@ -1,5 +1,5 @@
 # Flaskov
-[![Build Status](https://travis-ci.org/Svaught598/Flaskov.png?branch=master)](https://travis-ci.org/github/Svaught598/Flaskov)
+[![Build Status](https://travis-ci.org/Svaught598/Flaskov.png?branch=master)](https://travis-ci.org/github/Svaught598/Flaskov)      [![codecov](https://codecov.io/gh/Svaught598/Flaskov/branch/master/graph/badge.svg)](https://codecov.io/gh/Svaught598/Flaskov)
 
 Generating pseudo-sentences with Python, Flask, and Markov Chains.
 Project is in it's infancy at current.
