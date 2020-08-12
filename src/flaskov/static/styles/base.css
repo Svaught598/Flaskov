@@ -1,0 +1,26 @@
+.topnav {
+    background-color: #3D405B;
+    overflow: hidden;
+}
+
+.nav-item {
+    float: right;
+    color: #F4F1DE;
+    text-align: center;
+    padding: 20px 50px;
+    border-radius: 25px;
+    border: 3px solid black;
+    margin: 10px 10px;
+    text-decoration: none;
+    font-size: 30;
+}
+
+.nav-item:hover {
+    background-color: #E07A5F;
+    transition: background 0.2s ease-in-out;
+}
+
+.logo {
+    float: left;
+    margin: 10px 10px;
+}

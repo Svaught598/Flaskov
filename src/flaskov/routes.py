@@ -27,7 +27,7 @@ from . import db
 
 main = Blueprint("main", __name__, template_folder="templates")
 
-
+@main.route("/")
 @main.route("/index")
 def index():
     return render_template("index.html")
@@ -46,7 +46,7 @@ auth = Blueprint("auth", __name__, template_folder="templates")
 
 
 @auth.route("/login/", methods=['GET', 'POST'])
-def login_post():
+def login():
     """ Route for user login"""
     form = LoginForm(request.form)
 
@@ -67,7 +67,7 @@ def login_post():
 
 
 @auth.route("/register", methods=['GET', 'POST'])
-def register_post():
+def register():
     """ Route for user registration"""
     form = RegisterForm(request.form)
     #import pdb; pdb.set_trace()
