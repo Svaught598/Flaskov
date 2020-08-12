@@ -1,0 +1,1 @@
+[![Build Status](https://travis-ci.org/github/Svaught598/Flaskov.png?branch=master)](https://travis-ci.org/github/Svaught598/Flaskov)
