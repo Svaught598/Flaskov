@@ -30,8 +30,6 @@ class User(db.Model, UserMixin):
 @login_manager.user_loader
 def user_loader(user_id):
     try:
-        print(user_id)
-        print(User.query.get(user_id))
         return User.query.get(user_id)
     except:
         return
