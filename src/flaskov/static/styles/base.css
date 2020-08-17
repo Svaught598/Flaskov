@@ -1,18 +1,51 @@
-.topnav {
-    background-color: #3D405B;
+/* General Styling **************************/
+
+html,body
+{
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    overflow-x: hidden; 
+}
+
+/* Header Styles *****************************/
+
+body header {
+    background-color: #724559;
     overflow: hidden;
+    height: 80px;
+    min-height: 65px;
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 6000;
+    box-shadow: 0 8px 8px #000000;
+}
+
+.header-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-begin;
+    max-width: 1300px;
+    max-height: 80px;
+    align-items: center;
+    margin: 0 auto;
+    position: fixed;
+    right: 0;
+    left: 0;
 }
 
 .nav-item {
-    float: right;
     color: #F4F1DE;
-    text-align: center;
-    padding: 20px 50px;
-    border-radius: 25px;
-    border: 3px solid black;
-    margin: 10px 10px;
+    text-align: justify;
+    padding: 25px;
     text-decoration: none;
     font-size: 30;
+    font-weight: bold;
+    margin: 10px 5px;
+    border-radius: 10px;
 }
 
 .nav-item:hover {
@@ -22,5 +55,41 @@
 
 .logo {
     float: left;
-    margin: 10px 10px;
+    margin: 10px;
+}
+
+/* Body Styles *****************************/
+
+.main {
+    background-color: #E4D8B4;
+    overflow: hidden;
+    border-radius: 20px;
+    max-width: 1300px;
+    margin: 50px auto;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    padding: 0px 20px;
+    padding-bottom: 40px;
+    margin: 0 auto;
+}
+
+.image {
+    margin: auto;
+    height: 400px;
+    padding: 50px;
+}
+
+/* Other Elements ***************************/
+
+h1 {
+    font-weight: boldest;
+    font-size: 40px;
+}
+
+h3 {
+    color: white;
+    margin:20px;
 }
