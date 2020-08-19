@@ -1,4 +1,5 @@
 import json
+import random
 
 from flask_login import UserMixin
 
@@ -42,11 +43,11 @@ class MarkovModel(db.Model):
     """
     Markov Chain model for sentence generation
     
-    `START`: list(string)
+    `START`: string
         denotes the start of a sentence. serves as 
         the root of the model dict.
 
-    `END`: list(string)
+    `END`: string
         denotes the end of a sentence.
 
     `DEFAULT_NAME`: string
@@ -63,9 +64,12 @@ class MarkovModel(db.Model):
     model_order = db.Column(db.Integer, nullable=False)
     model_serialized = db.Column(db.String(), nullable=False)
     
-    START = ["START"]
-    END = ["END"]
+    START = "START"
+    END = "END"
     DEFAULT_NAME = "Unnamed Model"
+    EMPTY_MODEL_ERROR = (
+        "WHOA! You are trying to generate a sentence from an empty model!"
+    )
 
     def __init__(self, corpus=None, model=None, order=1, name=None):
         """
@@ -116,7 +120,16 @@ class MarkovModel(db.Model):
             sentence. used to generate model. 
         """
         order = self.model_order
-        words = self.START*order + sentence + self.END
+        words = [self.START]*order + sentence + [self.END]
+
+        # IMPORTANT COMMENT:
+        #
+        # loop through sentence.len + 1 because words.length 
+        # is equal to (sentence.length + order + 1)
+        #
+        # order is taken into account with list slicing below,
+        # so we have to include the one to take into account the
+        # END string
         for i in range(len(sentence) + 1):
             current = tuple(words[i:i+order])
             follows = words[i+order]
@@ -128,6 +141,29 @@ class MarkovModel(db.Model):
                 self.model[current][follows] = 0
 
             self.model[current][follows] += 1
+
+    def generate(self):
+        """
+        Generates a sentence from the markov model
+        """
+        # empty model should return error message
+        if self.model == {}:
+            return self.EMPTY_MODEL_ERROR
+
+        current_state = tuple(self.model_order * [self.START])
+        word_list = []
+
+        while self.END not in current_state:
+            next_word = random.choices(
+                [i for i in self.model[current_state].keys()],
+                weights=[i for i in self.model[current_state].values()])
+            word_list.append(next_word[0])
+            current_state = tuple(next_word)
+
+        # pop self.END from sentence
+        word_list.pop(-1) 
+        sentence = ' '.join(word_list)
+        return sentence
 
     def serialize(self):
         """

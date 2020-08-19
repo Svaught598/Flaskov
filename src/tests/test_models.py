@@ -71,21 +71,37 @@ def test_set_password(user):
 
 # Tests for markov model ######################################
 
-def test_empty_markov():
+def test_empty_model_should_have_empty_model_member():
     test_model = MarkovModel()
     assert test_model.model == {}
 
-def test_markov_add_sentence(markovmodel):
+def test_add_sentence_should_update_model(markovmodel):
     old_model = markovmodel.model.copy()
     markovmodel.add_sentence(["This", "is", "a", "new", "sentence."])
     model = markovmodel.model
     assert model != old_model
 
-def test_markov_serialization(markovmodel):
+def test_sequential_serialize_deserialize_should_preserve_original_model(markovmodel):
     previous_model = markovmodel.model.copy()
     markovmodel.serialize()
     markovmodel.deserialize()
     assert previous_model == markovmodel.model
 
-def test_model_name(markovmodel):
+def test_model_name_should_default_to_first_20_chars_of_corpus(markovmodel):
     assert markovmodel.model_name == CORPUS[0:20]+"..."
+
+def test_model_name_should_default_to_DEFAULT_NAME_if_no_corpus_and_no_name():
+    testmodel = MarkovModel()
+    assert testmodel.model_name == testmodel.DEFAULT_NAME
+
+def test_empty_model_should_generate_error_sentence():
+    testmodel = MarkovModel()
+    sentence = testmodel.generate()
+    assert sentence != None
+    assert sentence == testmodel.EMPTY_MODEL_ERROR
+
+def test_full_model_should_generate_sentence(markovmodel):
+    sentence = markovmodel.generate()
+    assert type(sentence) == str
+    assert len(sentence) != 0
+    assert sentence != markovmodel.EMPTY_MODEL_ERROR
