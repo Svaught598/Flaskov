@@ -7,8 +7,16 @@ Project is in it's infancy at current.
 
 # About
 
-Coming Soon!
+Markov Chains are simple stochastic models that predict the future state of a system using only the current state. Despite being very naive models, you can effectively generate *fake sentences* by constucting them using a corpus of actual sentences. Consider the following sentences
+1. I am very scared.
+2. I hate spiders.
+3. Spiders are very creepy.
+A Markov Chain model constructed from this corpus might look a bit like:
+![example image](src/flaskov/static/images/example.png)
 
+where each node represents a word in a sentence, and the numbers are relative weights (or probabilites) for words that follow. You can increase the accuracy of these models by adding to the corpus, or increasing the amount of words used to predict the next word (e.g. ('I', 'am') ---> 'very'). Other tooling exists in the Python ecosystem that can be joined with this method to improve sentence generation further ![NLTK](https://github.com/nltk/nltk).
+
+I started this project to learn more about web-development while playing around with this concept.
 # Features
 
 Coming Soon!
