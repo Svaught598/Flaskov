@@ -76,17 +76,16 @@ def test_empty_markov():
     assert test_model.model == {}
 
 def test_markov_add_sentence(markovmodel):
-    # dictA_str = json.dumps(dictA, sort_keys=True)
-    # dictB_str = json.dumps(dictB, sort_keys=True)
-    # assert dictA_str == dictB_str
-
     old_model = markovmodel.model.copy()
     markovmodel.add_sentence(["This", "is", "a", "new", "sentence."])
     model = markovmodel.model
     assert model != old_model
 
 def test_markov_serialization(markovmodel):
-    deserialization = MarkovModel.deserialize(
-        markovmodel.serialize()
-    )
-    assert deserialization.model == markovmodel.model
+    previous_model = markovmodel.model.copy()
+    markovmodel.serialize()
+    markovmodel.deserialize()
+    assert previous_model == markovmodel.model
+
+def test_model_name(markovmodel):
+    assert markovmodel.model_name == CORPUS[0:20]+"..."

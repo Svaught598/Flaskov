@@ -7,14 +7,22 @@ from . import db, login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-class User(db.Model, UserMixin):
-    __tablename__ = 'user'
+###############################################################
+# Models                                                      #
+###############################################################
 
+class User(db.Model, UserMixin):
+    """
+    User model for authentication
+
+    TODO:
+        Implement storage of markov models for each user.
+    """
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(200), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    
     
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -30,24 +38,36 @@ class User(db.Model, UserMixin):
 
 
 
-
 class MarkovModel(db.Model):
     """
     Markov Chain model for sentence generation
     
-    `START`: 
-        [string] to denote the start of a sentence. serves as 
+    `START`: list(string)
+        denotes the start of a sentence. serves as 
         the root of the model dict.
-    `END`: 
-        [string] to denote the end of a sentence.
+
+    `END`: list(string)
+        denotes the end of a sentence.
+
+    `DEFAULT_NAME`: string
+        denotes default model name when no name is 
+        provided or no corpus is provided
+
+    TODO:
+        implement methods to generate sentences
     """
     __tablename__ = 'markov_model'
     id = db.Column(db.Integer, primary_key = True)
-
+    model_name = db.Column(db.String(200), nullable=False)
+    model_size = db.Column(db.String(200), nullable=False)
+    model_order = db.Column(db.Integer, nullable=False)
+    model_serialized = db.Column(db.String(), nullable=False)
+    
     START = ["START"]
     END = ["END"]
+    DEFAULT_NAME = "Unnamed Model"
 
-    def __init__(self, corpus=None, model=None, order=1):
+    def __init__(self, corpus=None, model=None, order=1, name=None):
         """
         `corpus`: 
             a chunk of text. Should be multiple sentences 
@@ -66,9 +86,21 @@ class MarkovModel(db.Model):
         `order`: 
             an integer. The number of words used to predict
             the next word in a sentence.
+
+        `name`:
+            Name of the model:
+                - if provided, self.model_name = name
+                - if not provided, and corpus is provided, 
+            
         """
-        self.model = model if model else {}
-        self.order = order
+        self.model = (
+            model if model else 
+            {})
+        self.model_name = (
+            name if name else 
+            corpus[0:20] + "..." if corpus else 
+            self.DEFAULT_NAME)
+        self.model_order = order
         if corpus:
             # split corpus into list of sentences
             for sentence in corpus.split('. '):
@@ -83,8 +115,7 @@ class MarkovModel(db.Model):
             list of words that are ordered as a syntactically correct
             sentence. used to generate model. 
         """
-        self.old_model = self.model
-        order = self.order
+        order = self.model_order
         words = self.START*order + sentence + self.END
         for i in range(len(sentence) + 1):
             current = tuple(words[i:i+order])
@@ -97,31 +128,29 @@ class MarkovModel(db.Model):
                 self.model[current][follows] = 0
 
             self.model[current][follows] += 1
-        # if "This" in sentence:
-        #     import pdb; pdb.set_trace()
 
     def serialize(self):
-        """Serialize model as JSON string"""
-        return json.dumps(list(self.model.items()))
+        """
+        Serialize model as JSON string
+        Stores serialization as `model_serialized` member
+        """
+        self.model_serialized = json.dumps(list(self.model.items()))
 
-    @classmethod
-    def deserialize(cls, serialized_model):
-        """Deserialize JSON string to model"""
-        raw_model = json.loads(serialized_model)
-        model = {tuple(pair[0]):pair[1] for pair in raw_model}
-        return cls(model=model)
-        
+    def deserialize(self):
+        """
+        Deserialize JSON string to model
+        Stores deserialized model as `model` member
+        """
+        raw_model = json.loads(self.model_serialized)
 
-
-            
-            
-
-
-
-
+        # Next line removes outermost list, and changes keys from
+        # lists to tuples (to match original model structure)
+        self.model = {tuple(pair[0]):pair[1] for pair in raw_model}
 
 
-
+###############################################################
+# Helper Functions                                            #
+###############################################################
 
 @login_manager.user_loader
 def user_loader(user_id):
