@@ -91,6 +91,6 @@ class ModelFromCorpusForm(FlaskForm):
         - order
     """
     corpus = StringField("Corpus", validators=[DataRequired()])
-    name = StringFIeld("Model Name", validators=[DataRequired()])
+    name = StringField("Model Name", validators=[DataRequired()])
     order = IntegerField("Order", validators=[DataRequired()])
     submit = SubmitField("Generate Model")
