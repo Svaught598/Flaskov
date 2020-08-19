@@ -119,6 +119,8 @@ class MarkovModel(db.Model):
             for sentence in corpus.split('. '):
                 self.add_sentence(sentence.split())
 
+        self.serialize()
+
     def add_sentence(self, sentence):
         """
         Adds a sentence to the markov model. Used to build markov models.
@@ -154,6 +156,7 @@ class MarkovModel(db.Model):
         """
         Generates a sentence from the markov model
         """
+        self.deserialize()
         if self.model == {}:
             return self.EMPTY_MODEL_ERROR
 
@@ -172,7 +175,6 @@ class MarkovModel(db.Model):
 
         return ' '.join(word_list)
 
-
     def serialize(self):
         """
         Serialize model as JSON string
@@ -186,7 +188,6 @@ class MarkovModel(db.Model):
         Stores deserialized model as `model` member
         """
         raw_model = json.loads(self.model_serialized)
-
         # Next line removes outermost list, and changes keys from
         # lists to tuples (to match original model structure)
         self.model = {tuple(pair[0]):pair[1] for pair in raw_model}
