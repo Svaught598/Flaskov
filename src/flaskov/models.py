@@ -97,8 +97,8 @@ class MarkovModel(db.Model):
                 self.model[current][follows] = 0
 
             self.model[current][follows] += 1
-        if "This" in sentence:
-            import pdb; pdb.set_trace()
+        # if "This" in sentence:
+        #     import pdb; pdb.set_trace()
 
     def serialize(self):
         """Serialize model as JSON string"""
@@ -109,7 +109,6 @@ class MarkovModel(db.Model):
         """Deserialize JSON string to model"""
         raw_model = json.loads(serialized_model)
         model = {tuple(pair[0]):pair[1] for pair in raw_model}
-        #import pdb; pdb.set_trace()
         return cls(model=model)
         
 

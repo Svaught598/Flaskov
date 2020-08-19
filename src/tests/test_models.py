@@ -80,9 +80,9 @@ def test_markov_add_sentence(markovmodel):
     # dictB_str = json.dumps(dictB, sort_keys=True)
     # assert dictA_str == dictB_str
 
-    old_model = json.dumps(markovmodel.model, sort_keys=True)
+    old_model = markovmodel.model.copy()
     markovmodel.add_sentence(["This", "is", "a", "new", "sentence."])
-    model = json.dumps(markovmodel.model, sort_keys=True)
+    model = markovmodel.model
     assert model != old_model
 
 def test_markov_serialization(markovmodel):
