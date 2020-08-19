@@ -54,6 +54,10 @@ class MarkovModel(db.Model):
         denotes default model name when no name is 
         provided or no corpus is provided
 
+    `EMPTY_MODEL_ERROR`: string
+        error message when generate() is called with
+        no markov model.
+
     TODO:
         implement methods to generate sentences
     """
@@ -70,6 +74,12 @@ class MarkovModel(db.Model):
     EMPTY_MODEL_ERROR = (
         "WHOA! You are trying to generate a sentence from an empty model!"
     )
+
+    def __repr__(self):
+        return '<MarkovModel {}>'.format(self.model_name)
+
+    def get_id(self):
+        return self.id
 
     def __init__(self, corpus=None, model=None, order=1, name=None):
         """
@@ -106,9 +116,7 @@ class MarkovModel(db.Model):
             self.DEFAULT_NAME)
         self.model_order = order
         if corpus:
-            # split corpus into list of sentences
             for sentence in corpus.split('. '):
-                # add sentence as list of constituent words
                 self.add_sentence(sentence.split())
 
     def add_sentence(self, sentence):
@@ -124,7 +132,7 @@ class MarkovModel(db.Model):
 
         # IMPORTANT COMMENT:
         #
-        # loop through sentence.len + 1 because words.length 
+        # loop through (sentence.len + 1) because words.length 
         # is equal to (sentence.length + order + 1)
         #
         # order is taken into account with list slicing below,
@@ -146,24 +154,24 @@ class MarkovModel(db.Model):
         """
         Generates a sentence from the markov model
         """
-        # empty model should return error message
         if self.model == {}:
             return self.EMPTY_MODEL_ERROR
 
         current_state = tuple(self.model_order * [self.START])
         word_list = []
+        next_word = ""
 
-        while self.END not in current_state:
+        while self.END != next_word:
             next_word = random.choices(
                 [i for i in self.model[current_state].keys()],
-                weights=[i for i in self.model[current_state].values()])
-            word_list.append(next_word[0])
-            current_state = tuple(next_word)
+                weights=[i for i in self.model[current_state].values()]
+            )[0] # we need string, not list of string
 
-        # pop self.END from sentence
-        word_list.pop(-1) 
-        sentence = ' '.join(word_list)
-        return sentence
+            word_list.append(next_word)
+            current_state = tuple([next_word])
+
+        return ' '.join(word_list)
+
 
     def serialize(self):
         """
