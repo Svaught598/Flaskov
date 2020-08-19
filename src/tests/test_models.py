@@ -89,4 +89,4 @@ def test_markov_serialization(markovmodel):
     deserialization = MarkovModel.deserialize(
         markovmodel.serialize()
     )
-    assert deserialization == markovmodel
+    assert deserialization.model == markovmodel.model

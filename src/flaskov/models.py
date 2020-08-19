@@ -57,9 +57,9 @@ class MarkovModel(db.Model):
             words that make up a particular sentence
 
         `model`: 
-            A dict of dicts. each key represents a word (or words) 
+            A dict. each key represents a word (or words) 
             in a sentence where the corresponding value is a 
-            dictionary containing words that follow as keys. 
+            list containing words that have followed as keys. 
             essentially, an already built markov model. This 
             option is to support serialization/deserialization.
 
@@ -102,12 +102,14 @@ class MarkovModel(db.Model):
 
     def serialize(self):
         """Serialize model as JSON string"""
-        return json.dumps(self.model.items())
+        return json.dumps(list(self.model.items()))
 
     @classmethod
     def deserialize(cls, serialized_model):
         """Deserialize JSON string to model"""
-        model = json.loads(serialized_model)
+        raw_model = json.loads(serialized_model)
+        model = {tuple(pair[0]):pair[1] for pair in raw_model}
+        #import pdb; pdb.set_trace()
         return cls(model=model)
         
 
