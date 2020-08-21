@@ -4,15 +4,14 @@ import tempfile
 from sqlite3 import IntegrityError
 
 import pytest
-
 from flask_login import current_user
-
+from flask import session
 from werkzeug.security import generate_password_hash
 
 from ..flaskov import create_app, TestConfig
 from ..flaskov import db as _db
 from ..flaskov import login_manager 
-from ..flaskov.models import User
+from ..flaskov.models import User, MarkovModel
 
 
 
@@ -65,27 +64,27 @@ def db(app, request):
 
 
 @pytest.fixture(scope='function')
-def session(db, request):
+def _session(db, request): # named with underscore to prevent shadowing with flask session object
     """Creates a new database session for a test."""
     connection = db.engine.connect()
     transaction = connection.begin()
 
     options = dict(bind=connection, binds={})
-    session = db.create_scoped_session(options=options)
+    _session = db.create_scoped_session(options=options)
 
-    db.session = session
+    db.session = _session
 
     def teardown():
         transaction.rollback()
         connection.close()
-        session.remove()
+        _session.remove()
 
     request.addfinalizer(teardown)
-    return session
+    return _session
 
 
 @pytest.fixture(scope='function')
-def client(db, session, app):
+def client(db, _session, app):
     db_fd, app.config['DATABASE'] = tempfile.mkstemp()
     with app.test_client() as client:
         yield client
@@ -118,9 +117,19 @@ def register(client, username, password, email):
         'password2': password,
     }, follow_redirects=True)
 
+def generate_model(client, corpus, name, order):
+    return client.post('/generate_model', data={
+        'corpus': corpus,
+        'name': name,
+        'order': order,
+    }, follow_redirects=True)
+
+def generate_sentence(client):
+    return client.get('/generate_sentence')
+
 
 ###############################################################
-# Tests                                                       #
+# Auth Tests                                                  #
 ###############################################################
 
 def test_index(client):
@@ -183,3 +192,35 @@ def test_register_logged_in(client, app):
     rv = login(client, app.config["USERNAME"], app.config["PASSWORD"])
     rv = register(client, "Some username", "Some password", "email@gmail.com")
     assert b'Please logout to register a new account' in rv.data
+
+
+###############################################################
+# Markov Tests                                                #
+###############################################################
+
+TEST_ORDER = 1
+TEST_MODEL_NAME = "testmodel"
+TEST_CORPUS = """
+    Lorem ipsum dolor sit amet, consectetuer adipiscing elit, 
+    sed diam nonummy nibh euismod tincidunt ut laoreet dolore 
+    magna aliquam erat volutpat. Ut wisi enim ad minim veniam, 
+    quis nostrud exercitation ulliam corper suscipit lobortis 
+    nisl ut aliquip ex ea commodo consequat. Duis autem veleum 
+    iriure dolor in hendrerit in vulputate velit esse molestie 
+    consequat, vel willum lunombro dolore eu feugiat nulla 
+    facilisis at vero eros et accumsan et iusto odio dignissim 
+    qui blandit praesent luptatum zzril delenit augue duis dolore 
+    te feugait nulla facilisi.
+"""
+
+def test_creating_model_sets_model_id_on_session_and_displays_model_name(client):
+    rv = generate_model(client, corpus=TEST_CORPUS, name=TEST_MODEL_NAME, order=TEST_ORDER)
+    model_id = session["model_id"]
+    new_model = MarkovModel.query.get(model_id)
+    assert "testmodel" == new_model.model_name
+    assert b'testmodel' in rv.data
+
+def test_generated_sentence_displayed(client):
+    generate_model(client, corpus=TEST_CORPUS, name=TEST_MODEL_NAME, order=TEST_ORDER)
+    rv = generate_sentence(client)
+    assert b'sentence' in rv.data

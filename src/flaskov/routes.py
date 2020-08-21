@@ -6,6 +6,7 @@ from flask import (
     flash,
     url_for,
     abort,
+    session,
 )
 from flask_login import (
     login_user, 
@@ -16,8 +17,8 @@ from flask_login import (
 from werkzeug.security import generate_password_hash, check_password_hash
 from jinja2 import TemplateNotFound
 
-from .models import User
-from .forms import LoginForm, RegisterForm
+from .models import User, MarkovModel
+from .forms import LoginForm, RegisterForm, ModelFromCorpusForm
 from . import db
 
 
@@ -106,3 +107,37 @@ def register():
 @auth.route("/logout/")
 def logout():
     return render_template("logout.html")
+
+
+###############################################################
+# Markov Blueprint                                            #
+###############################################################
+
+markov = Blueprint("markov", __name__)
+
+@markov.route("/generate_model", methods=['GET','POST'])
+def generate_model():
+    form = ModelFromCorpusForm(request.form)
+
+    if form.validate_on_submit():
+        model = MarkovModel(
+            corpus=form.corpus.data, 
+            name=form.name.data,
+            order=form.order.data,
+        )
+        db.session.add(model)
+        db.session.commit()
+
+        session["model_id"] = model.id
+        return {
+            "model_name": model.model_name,
+            "model_size": model.model_size,
+        }
+
+@markov.route("/generate_sentence")
+def generate_sentence():
+    print(session)
+    model = MarkovModel.query.get(session["model_id"])
+    sentence = model.generate()
+    return {"sentence": sentence}
+

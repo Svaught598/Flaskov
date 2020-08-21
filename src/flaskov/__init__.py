@@ -30,9 +30,10 @@ def create_app(test_config=None):
         pass
 
     # register blueprints for routes
-    from src.flaskov.routes import main, auth
+    from src.flaskov.routes import main, auth, markov
     app.register_blueprint(main)
     app.register_blueprint(auth)
+    app.register_blueprint(markov)
 
     return app
 
