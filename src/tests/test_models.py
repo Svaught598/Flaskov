@@ -118,3 +118,8 @@ def test_full_model_should_generate_sentence(markovmodel):
     assert type(sentence) == str
     assert len(sentence) != 0
     assert sentence != markovmodel.EMPTY_MODEL_ERROR
+
+def test_generated_sentence_should_not_contain_START_END(markovmodel):
+    sentence = markovmodel.generate()
+    assert markovmodel.START not in sentence.split()
+    assert markovmodel.END not in sentence.split()

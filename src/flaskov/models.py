@@ -161,6 +161,9 @@ class MarkovModel(db.Model):
     def generate(self):
         """
         Generates a sentence from the markov model
+
+        returns: 
+            - string
         """
         self.deserialize()
         if self.model == {}:
@@ -170,13 +173,14 @@ class MarkovModel(db.Model):
         word_list = []
         next_word = ""
 
-        while self.END != next_word:
+        while next_word != self.END:
             next_word = random.choices(
                 [i for i in self.model[current_state].keys()],
                 weights=[i for i in self.model[current_state].values()]
             )[0] # we need string, not list of string
 
-            word_list.append(next_word)
+            if next_word != self.END: 
+                word_list.append(next_word)
             current_state = tuple([next_word])
 
         return ' '.join(word_list)
