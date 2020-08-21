@@ -63,7 +63,7 @@ class MarkovModel(db.Model):
     """
     __tablename__ = 'markov_model'
     id = db.Column(db.Integer, primary_key = True)
-    model_name = db.Column(db.String(200), nullable=False)
+    model_name = db.Column(db.String(200), unique=True, nullable=False)
     model_size = db.Column(db.String(200), nullable=False)
     model_order = db.Column(db.Integer, nullable=False)
     model_serialized = db.Column(db.String(), nullable=False)
@@ -121,6 +121,10 @@ class MarkovModel(db.Model):
 
         self.serialize()
 
+    def _compute_size(self):
+        """Subtract 2 from model size to get rid of START & END nodes"""
+        self.model_size = len(self.model.keys()) - self.model_order - 2
+
     def add_sentence(self, sentence):
         """
         Adds a sentence to the markov model. Used to build markov models.
@@ -151,6 +155,8 @@ class MarkovModel(db.Model):
                 self.model[current][follows] = 0
 
             self.model[current][follows] += 1
+
+        self._compute_size()
 
     def generate(self):
         """

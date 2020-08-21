@@ -75,6 +75,19 @@ def test_empty_model_should_have_empty_model_member():
     test_model = MarkovModel()
     assert test_model.model == {}
 
+def test_add_sentence_should_update_model_size(markovmodel):
+    # update with words in model doesn't produce new nodes, size is same
+    old_model_size = markovmodel.model_size
+    markovmodel.add_sentence(["Lorem", "ipsum", "dolor", "sit", "amet,"])
+    new_model_size = markovmodel.model_size
+    assert new_model_size == old_model_size
+
+    # update with words not in model does produce new nodes, size is changed
+    old_model_size = markovmodel.model_size
+    markovmodel.add_sentence(["This", "is", "a", "new", "sentence."])
+    new_model_size = markovmodel.model_size
+    assert new_model_size != old_model_size
+
 def test_add_sentence_should_update_model(markovmodel):
     old_model = markovmodel.model.copy()
     markovmodel.add_sentence(["This", "is", "a", "new", "sentence."])
