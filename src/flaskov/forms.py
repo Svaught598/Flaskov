@@ -3,7 +3,8 @@ from wtforms import (
     StringField, 
     PasswordField, 
     SubmitField, 
-    BooleanField
+    BooleanField,
+    IntegerField
 )
 from wtforms.validators import (
     DataRequired, 
@@ -13,6 +14,10 @@ from wtforms.validators import (
     Optional
 )
 
+
+###############################################################
+# Auth Forms                                                  #
+###############################################################
 
 class LoginForm(FlaskForm):
     """
@@ -70,3 +75,22 @@ class RegisterForm(FlaskForm):
         ]
     )
     submit = SubmitField("Register!")
+
+
+###############################################################
+# Markov Forms                                                #
+###############################################################
+
+class ModelFromCorpusForm(FlaskForm):
+    """
+    New markov model from corpus text
+
+    Data required fields:
+        - corpus
+        - name
+        - order
+    """
+    corpus = StringField("Corpus", validators=[DataRequired()])
+    name = StringField("Model Name", validators=[DataRequired()])
+    order = IntegerField("Order", validators=[DataRequired()])
+    submit = SubmitField("Generate Model")
