@@ -4,7 +4,8 @@ from wtforms import (
     PasswordField, 
     SubmitField, 
     BooleanField,
-    IntegerField
+    IntegerField,
+    RadioField,
 )
 from wtforms.validators import (
     DataRequired, 
@@ -13,6 +14,7 @@ from wtforms.validators import (
     Length, 
     Optional
 )
+from wtforms.widgets import TextArea
 
 
 ###############################################################
@@ -90,7 +92,7 @@ class ModelFromCorpusForm(FlaskForm):
         - name
         - order
     """
-    corpus = StringField("Corpus", validators=[DataRequired()])
+    corpus = StringField("Corpus", validators=[DataRequired()], widget=TextArea())
     name = StringField("Model Name", validators=[DataRequired()])
-    order = IntegerField("Order", validators=[DataRequired()])
+    order = RadioField('Order', choices=[('1','1'),('2','2'),('3','3')], validators=[DataRequired()])
     submit = SubmitField("Generate Model")
