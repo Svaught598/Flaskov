@@ -7,6 +7,7 @@ from flask import (
     url_for,
     abort,
     session,
+    jsonify,
 )
 from flask_login import (
     login_user, 
@@ -28,10 +29,27 @@ from . import db
 
 main = Blueprint("main", __name__, template_folder="templates")
 
-@main.route("/")
+@main.route("/", methods=["GET","POST"])
 @main.route("/index")
 def index():
-    return render_template("index.html")
+    form = ModelFromCorpusForm(request.form)
+
+    if form.validate_on_submit():
+        model = MarkovModel(
+            corpus=form.corpus.data, 
+            name=form.name.data,
+            order=form.order.data,
+        )
+        db.session.add(model)
+        db.session.commit()
+
+        session["model_id"] = model.id
+        return {
+            "model_name": model.model_name,
+            "model_size": model.model_size,
+        }
+
+    return render_template("index.html", form=form)
 
 
 @main.route("/about/")
@@ -115,7 +133,7 @@ def logout():
 
 markov = Blueprint("markov", __name__)
 
-@markov.route("/generate_model", methods=['GET','POST'])
+@markov.route("/generate_model", methods=['POST'])
 def generate_model():
     form = ModelFromCorpusForm(request.form)
 
@@ -125,14 +143,19 @@ def generate_model():
             name=form.name.data,
             order=form.order.data,
         )
-        db.session.add(model)
-        db.session.commit()
+        # db.session.add(model)
+        # db.session.commit()
+        # session["model_id"] = model.id
 
-        session["model_id"] = model.id
         return {
             "model_name": model.model_name,
             "model_size": model.model_size,
         }
+    else:
+        return {
+            "error_message": "Oops! Looks like something went wrong."
+        }
+    
 
 @markov.route("/generate_sentence")
 def generate_sentence():
