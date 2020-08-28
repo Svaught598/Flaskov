@@ -202,7 +202,6 @@ class MarkovModel(db.Model):
         # lists to tuples (to match original model structure)
         self.model = {tuple(pair[0]):pair[1] for pair in raw_model}
 
-
 ###############################################################
 # Helper Functions                                            #
 ###############################################################

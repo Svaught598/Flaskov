@@ -124,8 +124,10 @@ def generate_model(client, corpus, name, order):
         'order': order,
     }, follow_redirects=True)
 
-def generate_sentence(client):
-    return client.get('/generate_sentence')
+def generate_sentence(client, name):
+    return client.post('/generate_sentence', data={
+        'model_name': name,
+    }, follow_redirects=True)
 
 
 ###############################################################
@@ -222,5 +224,5 @@ def test_creating_model_sets_model_id_on_session_and_displays_model_name(client)
 
 def test_generated_sentence_displayed(client):
     generate_model(client, corpus=TEST_CORPUS, name=TEST_MODEL_NAME, order=TEST_ORDER)
-    rv = generate_sentence(client)
+    rv = generate_sentence(client,TEST_MODEL_NAME)
     assert b'sentence' in rv.data

@@ -35,6 +35,9 @@ def create_app(test_config=None):
     app.register_blueprint(auth)
     app.register_blueprint(markov)
 
+    # from src.flaskov.models import User, MarkovModel
+    # db.create_all()
+
     return app
 
 

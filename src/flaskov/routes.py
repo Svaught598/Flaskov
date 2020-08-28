@@ -29,26 +29,10 @@ from . import db
 
 main = Blueprint("main", __name__, template_folder="templates")
 
-@main.route("/", methods=["GET","POST"])
+@main.route("/", methods=["GET"])
 @main.route("/index")
 def index():
     form = ModelFromCorpusForm(request.form)
-
-    if form.validate_on_submit():
-        model = MarkovModel(
-            corpus=form.corpus.data, 
-            name=form.name.data,
-            order=form.order.data,
-        )
-        db.session.add(model)
-        db.session.commit()
-
-        session["model_id"] = model.id
-        return {
-            "model_name": model.model_name,
-            "model_size": model.model_size,
-        }
-
     return render_template("index.html", form=form)
 
 
@@ -64,7 +48,7 @@ def about():
 auth = Blueprint("auth", __name__, template_folder="templates")
 
 
-@auth.route("/login/", methods=['GET', 'POST'])
+@auth.route("/login", methods=['GET', 'POST'])
 def login():
     """ Route for user login"""
     form = LoginForm(request.form)
@@ -122,7 +106,7 @@ def register():
 
 # Login required routes
 @login_required
-@auth.route("/logout/")
+@auth.route("/logout")
 def logout():
     return render_template("logout.html")
 
@@ -141,11 +125,11 @@ def generate_model():
         model = MarkovModel(
             corpus=form.corpus.data, 
             name=form.name.data,
-            order=form.order.data,
+            order=int(form.order.data)
         )
-        # db.session.add(model)
-        # db.session.commit()
-        # session["model_id"] = model.id
+        db.session.add(model)
+        db.session.commit()
+        session["model_id"] = model.id
 
         return {
             "model_name": model.model_name,
@@ -157,10 +141,11 @@ def generate_model():
         }
     
 
-@markov.route("/generate_sentence")
+@markov.route("/generate_sentence", methods=['POST'])
 def generate_sentence():
-    print(session)
-    model = MarkovModel.query.get(session["model_id"])
-    sentence = model.generate()
+    model_name = request.form["model_name"]
+    clean_name = model_name[1:len(model_name)-1]
+    model = MarkovModel.query.filter_by(model_name=clean_name).first()
+    sentence = model.generate() if model else "There is no Markov model with this name!"
     return {"sentence": sentence}
 
