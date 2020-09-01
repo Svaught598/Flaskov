@@ -42,6 +42,7 @@ def create_app(test_config=None):
 
     # from src.flaskov.models import User, MarkovModel
     # db.create_all()
+    app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 
     return app
 

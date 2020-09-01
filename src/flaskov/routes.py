@@ -17,6 +17,7 @@ from flask_login import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from jinja2 import TemplateNotFound
+from sqlalchemy.exc import IntegrityError
 
 from .models import User, MarkovModel
 from .forms import LoginForm, RegisterForm, ModelFromCorpusForm
@@ -119,31 +120,38 @@ markov = Blueprint("markov", __name__)
 
 @markov.route("/generate_model", methods=['POST'])
 def generate_model():
-    form = ModelFromCorpusForm(request.form)
+    """
+    check if model exists with model_name
 
+    if name is taken:
+        - return `error_message` JSON response
+    if name not taken:
+        - generate model, commit to DB, and return 
+        JSON response with `model_name` & `model_size`
+    """
+    form = ModelFromCorpusForm(request.form)
     if form.validate_on_submit():
+        if MarkovModel.query.filter_by(model_name=form.name.data).first():
+            return {"error_message": "That Model name is taken. Try another!"}
+
         model = MarkovModel(
             corpus=form.corpus.data, 
             name=form.name.data,
-            order=int(form.order.data)
-        )
+            order=int(form.order.data))
         db.session.add(model)
         db.session.commit()
         session["model_id"] = model.id
-
         return {
             "model_name": model.model_name,
             "model_size": model.model_size,
         }
-    else:
-        return {
-            "error_message": "Oops! Looks like something went wrong."
-        }
+    return {"error_message": "Oops! Looks like something went wrong."}
     
 
-@markov.route("/generate_sentence", methods=['POST'])
+@markov.route("/generate_sentence", methods=['GET'])
 def generate_sentence():
-    model_name = request.form["model_name"]
+    print(request.form)
+    model_name = request.args["model_name"]
     clean_name = model_name[1:len(model_name)-1]
     model = MarkovModel.query.filter_by(model_name=clean_name).first()
     sentence = model.generate() if model else "There is no Markov model with this name!"
