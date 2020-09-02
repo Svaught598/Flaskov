@@ -150,10 +150,15 @@ def generate_model():
 
 @markov.route("/generate_sentence", methods=['GET'])
 def generate_sentence():
-    print(request.form)
-    model_name = request.args["model_name"]
-    clean_name = model_name[1:len(model_name)-1]
-    model = MarkovModel.query.filter_by(model_name=clean_name).first()
-    sentence = model.generate() if model else "There is no Markov model with this name!"
-    return {"sentence": sentence}
+    #import pdb; pdb.set_trace()
+    try: # if "model_name" is not in request.values, this block throws a TypeError
+        model_name = request.values.get("model_name")
+        model = MarkovModel.query.filter_by(model_name=model_name).first()
+        sentence = model.generate() if model else None
+    except:
+        error_message = "Oops! Looks like something went wrong."
+
+    if sentence: 
+        return {"sentence": sentence}
+    return {"error_message": error_message}
 

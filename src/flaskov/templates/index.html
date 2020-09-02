@@ -46,7 +46,6 @@ $(document).ready(function() {
                 }
             },
             success: function (data) {
-                console.log(data);
                 $(".model-name").text(data.model_name);
                 $(".model-size").text(data.model_size);
                 $(".model-panel").css("visibility", "visible");
@@ -62,18 +61,14 @@ $(document).ready(function() {
         $.ajax({
             type: "GET",
             url: url,
-            data: {model_name: JSON.stringify(name)},
-            beforeSend: function (xhr, settings){
-                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                    {% if form.csrf_token %}
-                    xhr.setRequestHeader("X-CSRFToken", "{{ form.csrf_token._value }}");
-                    {% else %}
-                    xhr.setRequestHeader("X-CSRFToken", "nothing");
-                    {% endif %}
-                }
-            },
+            data: {model_name: name},
             success: function(data) {
-                $(".sentence").text(data.sentence);
+                if (data.sentence) {
+                    $(".sentence").text(data.sentence);
+                }
+                if (data.error_message) {
+                    $(".sentence").text(data.error_message);
+                }
             }
         });
         e.preventDefault();
