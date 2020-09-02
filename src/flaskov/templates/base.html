@@ -10,13 +10,14 @@
   <div class="header-container">
     <a class="logo" href="{{ url_for('main.index') }}">
       <img src="{{ url_for('static',filename='images/logo.png') }}" height=60/>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     </a>
     <h3> Generate Psuedo Sentences </h3>
   </div>
 </header>
 <!-- BEGIN BODY ======================================================-->
-<div class="main">
-  <div class="main-content">
+<div id="main" class="main">
+  <div class="main-content row">
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul class=flashes>
@@ -26,9 +27,11 @@
         </ul>
       {% endif %}
     {% endwith %}
+
     {% block body %}
     {% endblock %}
   </div>
 </div>
-
+{% block script %}
+{% endblock %}
 </body>

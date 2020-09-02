@@ -1,5 +1,78 @@
 {% extends "base.html" %}
 
 {% block body %}
-<a href="{{ url_for('main.about') }}"> index </a>
+<div class="generate-form-container col">
+    {% from "_formhelpers.html" import render_field %}
+    <form method="POST">
+        {{ form.csrf_token }}
+        <dl>
+            {{ render_field(form.name) }}
+            {{ render_field(form.order) }}
+            {{ render_field(form.corpus) }}
+            {{ render_field(form.submit) }}
+        </dl>
+    </form>
+</div>
+
+<div class="col model-panel">
+    <h1 id="model-name" class="model-name">Test String</h1>
+    <h1 id="model-size" class="model-size"></h1>
+    <form method="POST">
+        {{ form.csrf_token }}
+        <input id="generate-sentence" type="submit" value="Generate Sentence">
+    </form>
+    <h1 class="sentence"></h1>
+</div>
+
+{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function() {
+
+    // Ajax request to `generate_model` endpoint
+    $('form').submit(function (e) {
+        var url = "{{ url_for('markov.generate_model') }}";
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: $('form').serialize(),
+            beforeSend: function (xhr, settings){
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    {% if form.csrf_token %}
+                    xhr.setRequestHeader("X-CSRFToken", "{{ form.csrf_token._value }}");
+                    {% else %}
+                    xhr.setRequestHeader("X-CSRFToken", "nothing");
+                    {% endif %}
+                }
+            },
+            success: function (data) {
+                $(".model-name").text(data.model_name);
+                $(".model-size").text(data.model_size);
+                $(".model-panel").css("visibility", "visible");
+            }
+        });
+        e.preventDefault(); 
+    });
+
+    // Ajax request to `generate_sentence` endpoint
+    $('#generate-sentence').click(function (e) {
+        var url = "{{ url_for('markov.generate_sentence') }}";
+        var name = $(".model-name").text();
+        $.ajax({
+            type: "GET",
+            url: url,
+            data: {model_name: name},
+            success: function(data) {
+                if (data.sentence) {
+                    $(".sentence").text(data.sentence);
+                }
+                if (data.error_message) {
+                    $(".sentence").text(data.error_message);
+                }
+            }
+        });
+        e.preventDefault();
+    })
+});
+</script>
 {% endblock %}
