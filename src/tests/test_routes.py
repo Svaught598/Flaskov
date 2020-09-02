@@ -125,7 +125,9 @@ def generate_model(client, corpus, name, order):
     }, follow_redirects=True)
 
 def generate_sentence(client, name):
-    return client.get(f'/generate_sentence/{name}', follow_redirects=True)
+    return client.get(f'/generate_sentence', data={
+        'model_name': name,
+    }, follow_redirects=True)
 
 
 ###############################################################
