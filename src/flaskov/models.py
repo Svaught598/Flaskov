@@ -165,25 +165,26 @@ class MarkovModel(db.Model):
         returns: 
             - string
         """
+        order = self.model_order
         self.deserialize()
         if self.model == {}:
             return self.EMPTY_MODEL_ERROR
 
-        word_list = [self.START] * self.model_order
-        current_state = tuple(word_list[-self.model_order:])
+        word_list = [self.START] * order
+        current_state = tuple(word_list[-order:])
         next_word = ""
 
         while next_word != self.END:
+            paths = self.model[current_state]
             next_word = random.choices(
-                [i for i in self.model[current_state].keys()],
-                weights=[i for i in self.model[current_state].values()]
-            )[0] # we need string, not list of string
+                population=list(paths.keys()), 
+                weights=list(paths.values())
+            ).pop()
+            
+            word_list.append(next_word)
+            current_state = tuple(word_list[-order:])
 
-            if next_word != self.END: 
-                word_list.append(next_word)
-            current_state = tuple(word_list[-self.model_order:])
-
-        word_list = word_list[self.model_order:len(word_list)-self.model_order-1]
+        word_list = word_list[order: len(word_list) - order - 1]
         return ' '.join(word_list)
 
     def serialize(self):
