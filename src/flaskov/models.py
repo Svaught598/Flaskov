@@ -169,8 +169,8 @@ class MarkovModel(db.Model):
         if self.model == {}:
             return self.EMPTY_MODEL_ERROR
 
-        current_state = tuple(self.model_order * [self.START])
-        word_list = []
+        word_list = [self.START] * self.model_order
+        current_state = tuple(word_list[-self.model_order:])
         next_word = ""
 
         while next_word != self.END:
@@ -181,8 +181,9 @@ class MarkovModel(db.Model):
 
             if next_word != self.END: 
                 word_list.append(next_word)
-            current_state = tuple([next_word])
+            current_state = tuple(word_list[-self.model_order:])
 
+        word_list = word_list[self.model_order:len(word_list)-self.model_order-1]
         return ' '.join(word_list)
 
     def serialize(self):

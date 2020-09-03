@@ -123,3 +123,10 @@ def test_generated_sentence_should_not_contain_START_END(markovmodel):
     sentence = markovmodel.generate()
     assert markovmodel.START not in sentence.split()
     assert markovmodel.END not in sentence.split()
+
+def test_generated_sentence_with_higher_order_model():
+    model = MarkovModel(corpus=CORPUS, order=3)
+    sentence = model.generate()
+    assert model.START not in sentence.split()
+    assert model.END not in sentence.split()
+    assert(len(sentence)) != 0
