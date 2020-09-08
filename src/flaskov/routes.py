@@ -156,6 +156,7 @@ def generate_sentence():
         model = MarkovModel.query.filter_by(model_name=model_name).first()
         sentence = model.generate() if model else None
     except:
+        sentence = None
         error_message = "Oops! Looks like something went wrong."
 
     if sentence: 

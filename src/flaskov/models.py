@@ -116,7 +116,8 @@ class MarkovModel(db.Model):
             self.DEFAULT_NAME)
         self.model_order = order
         if corpus:
-            for sentence in corpus.split('. '):
+            import pdb; pdb.set_trace()
+            for sentence in corpus.split('.'):
                 self.add_sentence(sentence.split())
 
         self.serialize()
@@ -180,11 +181,15 @@ class MarkovModel(db.Model):
                 population=list(paths.keys()), 
                 weights=list(paths.values())
             ).pop()
+            print("keys:     ", list(paths.keys()))
+            print("values:   ", list(paths.values()))
+            print("nextword: ", next_word)
+            print()
             
             word_list.append(next_word)
             current_state = tuple(word_list[-order:])
 
-        word_list = word_list[order: len(word_list) - order - 1]
+        word_list = word_list[order: len(word_list) - 1]
         return ' '.join(word_list)
 
     def serialize(self):
