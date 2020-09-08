@@ -116,7 +116,6 @@ class MarkovModel(db.Model):
             self.DEFAULT_NAME)
         self.model_order = order
         if corpus:
-            import pdb; pdb.set_trace()
             for sentence in corpus.split('.'):
                 self.add_sentence(sentence.split())
 
