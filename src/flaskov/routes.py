@@ -157,9 +157,8 @@ def generate_sentence():
         sentence = model.generate() if model else None
     except:
         sentence = None
-        error_message = "Oops! Looks like something went wrong."
 
     if sentence: 
         return {"sentence": sentence}
-    return {"error_message": error_message}
+    return {"error_message": "Oops! Looks like something went wrong."}
 

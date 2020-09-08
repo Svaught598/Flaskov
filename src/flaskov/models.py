@@ -136,6 +136,10 @@ class MarkovModel(db.Model):
         order = self.model_order
         words = [self.START]*order + sentence + [self.END]
 
+        # If sentence is empty list
+        if words == [self.START]*order + [self.END]:
+            return
+
         # IMPORTANT COMMENT:
         #
         # loop through (sentence.len + 1) because words.length 
@@ -180,10 +184,6 @@ class MarkovModel(db.Model):
                 population=list(paths.keys()), 
                 weights=list(paths.values())
             ).pop()
-            print("keys:     ", list(paths.keys()))
-            print("values:   ", list(paths.values()))
-            print("nextword: ", next_word)
-            print()
             
             word_list.append(next_word)
             current_state = tuple(word_list[-order:])
